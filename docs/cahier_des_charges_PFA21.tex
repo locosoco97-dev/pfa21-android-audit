@@ -1,0 +1,534 @@
+% ============================================================
+%  Cahier des charges -- PFA-21
+%  Compatible pdfLaTeX, XeLaTeX et LuaLaTeX (2 passes)
+% ============================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[utf8]{inputenc}
+  \usepackage[T1]{fontenc}
+  \usepackage{lmodern}
+  \usepackage[french]{babel}
+  \newcommand{\code}[1]{{\NoAutoSpacing\texttt{\small #1}}}
+\else
+  \usepackage{fontspec}
+  \setmainfont{Latin Modern Roman}
+  \setsansfont{Latin Modern Sans}
+  \setmonofont{Latin Modern Mono}
+  \usepackage{polyglossia}
+  \setmainlanguage{french}
+  \newcommand{\code}[1]{{\texttt{\small #1}}}
+\fi
+\usepackage[a4paper,margin=2.5cm,headheight=15pt]{geometry}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\usepackage{setspace}
+\usepackage[hidelinks]{hyperref}
+
+% ---------- Couleurs ----------
+\definecolor{bleu}{HTML}{1F3A5F}
+\definecolor{bleuclair}{HTML}{E8EEF6}
+\definecolor{gris}{HTML}{F4F4F4}
+\definecolor{vert}{HTML}{2E7D32}
+\definecolor{rouge}{HTML}{C62828}
+
+% ---------- Raccourcis ----------
+\newcommand{\PASS}{\textbf{\textcolor{vert}{PASS}}}
+\newcommand{\FAIL}{\textbf{\textcolor{rouge}{FAIL}}}
+\newcommand{\WARN}{\textbf{\textcolor{orange}{WARN}}}
+
+% ---------- Titres ----------
+\titleformat{\section}{\Large\bfseries\color{bleu}}{\thesection.}{0.6em}{}
+\titleformat{\subsection}{\large\bfseries\color{bleu}}{\thesubsection}{0.6em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\color{bleu}}{\thesubsubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{1.6em}{0.9em}
+\titlespacing*{\subsection}{0pt}{1.2em}{0.5em}
+
+% ---------- En-tête / pied de page ----------
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{bleu}PFA-21 --- Audit statique d'une application Android}
+\fancyhead[R]{\small\color{bleu}Cahier des charges}
+\fancyfoot[L]{\small EMSI --- Cybersécurité et Réseaux}
+\fancyfoot[R]{\small Page \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\fancypagestyle{plain}{\fancyhf{}\renewcommand{\headrulewidth}{0pt}\renewcommand{\footrulewidth}{0pt}}
+
+% ---------- Listes et tableaux ----------
+\setlist[itemize]{leftmargin=1.4em,itemsep=2pt,topsep=4pt}
+\setlist[enumerate]{leftmargin=1.6em,itemsep=2pt,topsep=4pt}
+\renewcommand{\arraystretch}{1.3}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+\setlength{\emergencystretch}{2em}
+\newcommand{\hd}[1]{\textcolor{white}{\textbf{#1}}}
+\usepackage{colortbl}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+% ---------- Code ----------
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  backgroundcolor=\color{gris},
+  frame=single,
+  rulecolor=\color{bleu!40},
+  breaklines=true,
+  columns=fullflexible,
+  keepspaces=true,
+  xleftmargin=0.5em,xrightmargin=0.5em,
+  aboveskip=8pt,belowskip=8pt
+}
+
+% ---------- Encadré ----------
+\newtcolorbox{remarque}[1][Remarque]{
+  colback=bleuclair,colframe=bleu,fonttitle=\bfseries,title=#1,
+  boxrule=0.5pt,arc=2pt,left=6pt,right=6pt,top=4pt,bottom=4pt
+}
+
+\hypersetup{
+  pdftitle={Cahier des charges PFA-21},
+  pdfauthor={BENLYAMANI Ziad, FERDOUS Larbi Sifeddine},
+  pdfsubject={Audit statique très ciblé d'une application Android}
+}
+
+\begin{document}
+
+% ============================================================
+%  PAGE DE GARDE
+% ============================================================
+\begin{titlepage}
+\thispagestyle{empty}
+\centering
+\setstretch{1.15}
+
+% Logo : décommenter et placer le fichier à côté du .tex
+% \includegraphics[height=2.4cm]{logo_emsi.png}\par
+
+{\large\color{bleu}\textbf{École Marocaine des Sciences de l'Ingénieur (EMSI)}}\par
+{\normalsize Ingénierie Informatique et Réseaux --- Option Cybersécurité et Réseaux}\par
+
+\vspace{2.2cm}
+{\color{bleu}\rule{\textwidth}{1.6pt}}\par
+\vspace{0.6cm}
+{\Large\bfseries\color{bleu} PROJET PFA}\par
+\vspace{0.4cm}
+{\huge\bfseries Audit statique très ciblé\\[4pt] d'une application Android}\par
+\vspace{0.6cm}
+{\color{bleu}\rule{\textwidth}{1.6pt}}\par
+
+\vspace{1.2cm}
+{\Large\bfseries Cahier des charges}\par
+\vspace{0.3cm}
+{\large Projet PFA-21}\par
+
+\vfill
+
+\begin{tabular}{p{7.2cm}p{7.2cm}}
+\textbf{\color{bleu}\large Réalisé par :} & \textbf{\color{bleu}\large Encadré par :}\\[8pt]
+BENLYAMANI Ziad & Pr. OUAGUID Abdellah\\
+FERDOUS Larbi Sifeddine &\\
+\end{tabular}
+
+\vfill
+
+{\normalsize Année universitaire 2026--2027}\par
+{\normalsize Version 1.0 --- Novembre 2026}\par
+\end{titlepage}
+
+% ============================================================
+%  SOMMAIRE
+% ============================================================
+\pagenumbering{roman}
+\tableofcontents
+\clearpage
+\pagenumbering{arabic}
+
+% ============================================================
+\section{Présentation du projet}
+% ============================================================
+
+\subsection{Contexte}
+Une équipe fictive développe une application Android interne permettant de consulter le programme d'un événement (« EventSchedule »). Avant toute évolution, elle souhaite s'assurer que le fichier \code{AndroidManifest.xml} ne contient aucun choix risqué : permission excessive, composant exposé ou configuration de sécurité imprudente.
+
+\subsection{Problématique}
+Comment vérifier de façon automatique, reproductible et justifiée que le manifeste d'une application Android respecte un socle minimal de sécurité, puis démontrer qu'une correction modifie bien le constat ?
+
+\subsection{Objectif général}
+Détecter puis corriger un choix de configuration Android non sécurisé, par un audit statique outillé en Python, avec preuves avant/après.
+
+\subsection{Objectifs spécifiques}
+\begin{itemize}
+  \item \textbf{OS1} : sélectionner un projet Android libre ou pédagogique autorisé (ou en créer un minimal).
+  \item \textbf{OS2} : définir une grille de 4 contrôles de manifeste, chacun avec règle, sévérité, justification et référence.
+  \item \textbf{OS3} : développer un script Python lisant le manifeste et produisant un état (\PASS{} / \WARN{} / \FAIL{}) et une justification par contrôle.
+  \item \textbf{OS4} : introduire volontairement un paramètre trop permissif, le détecter, le corriger, relancer l'audit.
+  \item \textbf{OS5} : automatiser \textit{setup / start / test / stop} et documenter les actions non automatisables.
+  \item \textbf{OS6} : permettre à chaque membre de redéployer et valider le MVP sur sa propre machine.
+\end{itemize}
+
+\subsection{Indicateurs de réussite}
+\begin{center}
+\begin{tabular}{L{9.2cm}L{5.4cm}}
+\rowcolor{bleu}\hd{Indicateur} & \hd{Cible}\\
+Contrôles implémentés avec état et justification & 4 / 4\\
+Constat \FAIL{} sur le manifeste « avant » & au moins 1 (paramètre ciblé)\\
+Constat \PASS{} sur le même contrôle après correction & 100\,\%\\
+Tests de recette réussis avec preuve & 3 / 3\\
+Redéploiement réussi sur le poste de chaque membre & 100\,\%\\
+Tests automatisés Python au vert & 100\,\%\\
+\end{tabular}
+\end{center}
+
+% ============================================================
+\section{Périmètre}
+% ============================================================
+
+\subsection{Inclus (MVP)}
+\begin{itemize}
+  \item Analyse statique du seul \code{AndroidManifest.xml} (et des fichiers XML qu'il référence directement, par exemple \code{network\_security\_config.xml}).
+  \item 4 contrôles de manifeste et de permissions.
+  \item Un manifeste « avant » (volontairement vulnérable) et un manifeste « après » (corrigé).
+  \item Script Python, tests automatisés, rapports (console et JSON), preuves.
+\end{itemize}
+
+\subsection{Exclus}
+\begin{itemize}
+  \item Publication sur un magasin d'applications, usage d'un téléphone personnel ou réel.
+  \item Pentest mobile avancé, HarmonyOS natif, certification MASVS.
+  \item Analyse du code Java/Kotlin, des bibliothèques tierces et du trafic réseau.
+\end{itemize}
+
+\subsection{Extensions (après validation du MVP, avec accord de l'encadrant)}
+\begin{itemize}
+  \item Analyse complémentaire avec MobSF (conteneur Docker) et comparaison avec le script.
+  \item Compilation de l'APK (Gradle) pour vérifier le manifeste fusionné.
+  \item Test dynamique sur émulateur.
+\end{itemize}
+
+\subsection{Hypothèses et contraintes}
+\begin{itemize}
+  \item Tout le travail est local (conteneur ou machine personnelle), sans appareil réel.
+  \item Seules des applications libres, pédagogiques ou créées par l'équipe sont analysées.
+  \item Les exigences peuvent évoluer sur décision de l'encadrant.
+  \item Chaque membre maîtrise l'intégralité du projet.
+\end{itemize}
+
+% ============================================================
+\section{Parties prenantes et rôles}
+% ============================================================
+\begin{center}
+\begin{tabular}{L{3.6cm}L{11cm}}
+\rowcolor{bleu}\hd{Rôle} & \hd{Responsabilités}\\
+Encadrant & Valide le sujet, le cahier des charges, les extensions et la recette\\
+Membre A & Vérifications, références (OWASP, Android), définition des règles et de la grille\\
+Membre B & Correction du paramètre, automatisation (scripts), collecte des preuves\\
+Membre C (si trinôme) & Tests, scripts de validation, documentation\\
+\end{tabular}
+\end{center}
+En binôme, les tâches du membre C sont réparties entre A et B.
+
+% ============================================================
+\section{Environnement et outillage}
+% ============================================================
+\begin{center}
+\begin{tabular}{L{3.6cm}L{11cm}}
+\rowcolor{bleu}\hd{Élément} & \hd{Choix}\\
+Système & Linux, Windows ou macOS avec Docker, ou machine virtuelle Linux\\
+Conteneur & Image Python 3.11+ (Dockerfile fourni)\\
+Langage & Python 3 (bibliothèque standard \code{xml.etree.ElementTree}, option \code{defusedxml})\\
+Tests & \code{pytest}\\
+Versionnage & Git\\
+Optionnel & Android Studio (consultation/édition), MobSF (extension)\\
+\end{tabular}
+\end{center}
+
+% ============================================================
+\section{Application cible}
+% ============================================================
+
+\subsection{Critères de sélection}
+\begin{itemize}
+  \item Licence libre ou usage pédagogique explicite ; code source disponible ; manifeste lisible.
+  \item Petite taille, sans dépendance à un appareil.
+  \item Possibilité de modifier le manifeste sans casser le projet.
+\end{itemize}
+
+\subsection{Choix recommandé}
+Créer (ou adapter) un mini-projet « EventSchedule » : une activité principale, un service ou récepteur interne, un fournisseur de contenu et quelques permissions. Avantage : contrôle total du manifeste et aucun problème de licence. Alternative : une application volontairement vulnérable open source (par exemple DIVA), après vérification de sa licence et accord de l'encadrant.
+
+\subsection{Paramètre volontairement permissif (cas d'étude)}
+Un composant interne (par exemple un \code{Service} ou un \code{BroadcastReceiver} de synchronisation du programme) déclaré avec \code{android:exported="true"} sans permission de protection. Les trois autres contrôles restent conformes dans le manifeste « avant », afin que le constat évolue uniquement sur le point ciblé.
+
+% ============================================================
+\section{Grille des 4 contrôles}
+% ============================================================
+\begin{longtable}{@{}L{0.8cm}L{2.4cm}L{2.9cm}L{4.6cm}L{2.7cm}@{}}
+\rowcolor{bleu}\color{white}\bfseries ID & \color{white}\bfseries Contrôle & \color{white}\bfseries Élément analysé & \color{white}\bfseries Règle de décision & \color{white}\bfseries Références\\
+\endhead
+C1 & Permissions excessives & \code{<uses-permission>} & \FAIL{} si une permission dangereuse non justifiée figure hors des besoins déclarés ; \WARN{} si sensible mais plausible & Android (permissions dangereuses), CWE-250, MASVS-PLATFORM\\
+C2 & Composants exportés non protégés & \code{<activity>}, \code{<service>}, \code{<receiver>}, \code{<provider>} & \FAIL{} si \code{exported="true"} (explicite, ou implicite via \code{intent-filter} avec \code{targetSdk} $<$ 31) sans \code{android:permission}, hors activité LAUNCHER & CWE-926, MASVS-PLATFORM\\
+C3 & Drapeaux applicatifs & \code{android:debuggable}, \code{android:allowBackup} & \FAIL{} si \code{debuggable="true"} ; \WARN{} si \code{allowBackup="true"} (ou absent selon la cible) & CWE-489, MASVS-STORAGE\\
+C4 & Trafic en clair & \code{usesCleartextTraffic}, \code{networkSecurityConfig} & \FAIL{} si \code{usesCleartextTraffic="true"} ou configuration autorisant le clair globalement ; \PASS{} sinon & CWE-319, MASVS-NETWORK\\
+\end{longtable}
+
+\begin{remarque}[À valider]
+Le choix des 4 contrôles est adaptable avec l'accord de l'encadrant. Les références (CWE, MASVS) sont indicatives et doivent être vérifiées et citées avec leur source dans le dossier final.
+\end{remarque}
+
+Pour chaque contrôle, la grille documente : objectif, risque, condition \FAIL{}/\WARN{}/\PASS{}, justification type, remédiation recommandée et faux positifs connus.
+
+% ============================================================
+\section{Exigences fonctionnelles}
+% ============================================================
+\begin{longtable}{@{}L{1.1cm}L{5.9cm}L{2.1cm}L{4.5cm}@{}}
+\rowcolor{bleu}\color{white}\bfseries ID & \color{white}\bfseries Exigence & \color{white}\bfseries Priorité & \color{white}\bfseries Critère d'acceptation\\
+\endhead
+EF1 & Sélectionner et documenter l'application cible (source, licence, version) & Obligatoire & Fiche de cible validée par l'encadrant\\
+EF2 & Signaler le paramètre volontairement permissif & Obligatoire & Contrôle concerné en \FAIL{} sur le manifeste « avant »\\
+EF3 & Le constat évolue après modification du manifeste & Obligatoire & Même contrôle en \PASS{} sur le manifeste « après »\\
+EF4 & Chaque contrôle fournit un état et une justification & Obligatoire & 4 lignes (ID, état, justification) par rapport\\
+EF5 & Le script lit le manifeste via un chemin passé en argument & Obligatoire & \code{python audit.py chemin/AndroidManifest.xml} fonctionne\\
+EF6 & Sortie console lisible et sortie JSON & Obligatoire & Fichier JSON valide, produit à la demande\\
+EF7 & Code de sortie exploitable (0 conforme, 1 constat \FAIL{}, 2 erreur) & Obligatoire & Vérifié par test automatisé\\
+EF8 & Comparaison avant/après & Obligatoire & Commande ou rapport listant les contrôles qui changent\\
+EF9 & Gestion des erreurs (fichier absent, XML invalide) & Obligatoire & Message clair, code 2, pas de trace brute\\
+EF10 & Extension MobSF & Optionnel & Rapport MobSF comparé à celui du script\\
+\end{longtable}
+
+% ============================================================
+\section{Exigences non fonctionnelles}
+% ============================================================
+\begin{itemize}
+  \item \textbf{Reproductibilité} : déploiement identique sur chaque poste via conteneur et scripts versionnés.
+  \item \textbf{Sécurité du traitement} : parseur XML durci (pas d'entités externes), aucune exécution de code issu de la cible, aucun accès réseau requis à l'exécution.
+  \item \textbf{Lisibilité} : code commenté, PEP~8, une fonction par contrôle.
+  \item \textbf{Extensibilité} : ajout d'un contrôle sans modifier le noyau (registre de contrôles).
+  \item \textbf{Traçabilité} : chaque constat renvoie à l'élément XML et à la règle appliquée.
+  \item \textbf{Éthique et légalité} : cibles autorisées uniquement.
+  \item \textbf{Documentation} : toute commande est documentée et testée à froid.
+\end{itemize}
+
+% ============================================================
+\section{Spécification du script d'audit}
+% ============================================================
+
+\subsection{Interface}
+\begin{lstlisting}
+python audit.py <manifest.xml> [--json rapport.json] [--compare autre.xml]
+\end{lstlisting}
+
+\subsection{Fonctionnement}
+\begin{enumerate}
+  \item Charger et valider le XML (gestion de l'espace de noms \code{android}).
+  \item Extraire : \code{targetSdkVersion} (si présent), permissions, composants et leurs attributs, attributs de \code{<application>}.
+  \item Exécuter les contrôles C1 à C4 (fonctions indépendantes retournant état, justification, élément concerné).
+  \item Agréger, afficher, exporter en JSON et retourner le code de sortie.
+\end{enumerate}
+
+\subsection{Format de sortie JSON (exemple)}
+\begin{lstlisting}
+{
+  "fichier": "manifests/avant/AndroidManifest.xml",
+  "controles": [
+    {"id": "C2", "etat": "FAIL", "element": "service .SyncService",
+     "justification": "exported=true sans permission"}
+  ],
+  "synthese": {"PASS": 3, "WARN": 0, "FAIL": 1}
+}
+\end{lstlisting}
+
+\subsection{Points techniques à traiter}
+\begin{itemize}
+  \item Valeur par défaut de \code{exported} selon la version cible (comportement différent avant et après Android~12).
+  \item Attribut absent versus explicitement à \code{false}.
+  \item Activité LAUNCHER exportée légitimement : éviter le faux positif.
+  \item Manifeste fusionné (APK) versus manifeste source : le préciser dans le rapport.
+\end{itemize}
+
+% ============================================================
+\section{Automatisation : setup / start / test / stop}
+% ============================================================
+\begin{center}
+\begin{tabular}{L{2.8cm}L{3.6cm}L{8.2cm}}
+\rowcolor{bleu}\hd{Commande} & \hd{Rôle} & \hd{Détail}\\
+\code{make setup} & Prépare l'environnement & Construit l'image Docker, installe \code{pytest}, vérifie les versions\\
+\code{make start} & Lance l'audit & Exécute le script sur le manifeste « avant » et génère les rapports\\
+\code{make test} & Valide & Lance \code{pytest} puis le scénario avant/après et vérifie le changement de constat\\
+\code{make stop} & Nettoie & Arrête et supprime le conteneur, purge les fichiers temporaires\\
+\end{tabular}
+\end{center}
+Des équivalents shell/PowerShell sont fournis si \code{make} est indisponible.
+
+\textbf{Actions non automatisables (à documenter) :} choix et validation de l'application par l'encadrant, installation de Docker ou d'Android Studio, captures d'écran des preuves visuelles, interprétation métier des constats, rédaction de la justification des \WARN{}.
+
+% ============================================================
+\section{Recette obligatoire}
+% ============================================================
+\begin{longtable}{@{}L{0.9cm}L{3.3cm}L{3.3cm}L{2.2cm}L{3.6cm}@{}}
+\rowcolor{bleu}\color{white}\bfseries Test & \color{white}\bfseries Action & \color{white}\bfseries Attendu & \color{white}\bfseries Résultat & \color{white}\bfseries Preuve\\
+\endhead
+T1 & Exécuter les 4 contrôles sur le manifeste « avant » & 4 lignes (état et justification) & à compléter & Capture console et JSON\\
+T2 & Vérifier la détection du paramètre permissif & Contrôle ciblé en \FAIL{}, élément nommé & à compléter & Rapport « avant »\\
+T3 & Corriger le paramètre puis relancer & Contrôle ciblé en \PASS{}, autres inchangés & à compléter & Rapport « après », diff Git, journal de \code{make test}\\
+\end{longtable}
+
+Chaque test est consigné dans une fiche : identifiant, date, exécutant, machine, action, attendu, résultat, preuve (chemin du fichier), verdict.
+
+% ============================================================
+\section{Livrables}
+% ============================================================
+\begin{enumerate}
+  \item Cahier des charges (le présent document, version finale).
+  \item Grille des 4 contrôles complète.
+  \item Projet ou manifeste cible : versions « avant » et « après ».
+  \item Script \code{audit.py}, tests \code{pytest}, scripts \textit{setup/start/test/stop}, Dockerfile, Makefile.
+  \item Dossier de preuves (captures, rapports JSON, journaux) pour chaque membre.
+  \item Rapport de recette et rapport final.
+  \item Support de soutenance et démonstration reproductible.
+\end{enumerate}
+
+\subsection{Structure du dépôt}
+\begin{lstlisting}
+pfa21/
+|-- app/manifests/{avant,apres}/AndroidManifest.xml
+|-- src/audit.py
+|-- tests/
+|-- scripts/{setup,start,test,stop}
+|-- docs/{cahier_des_charges,grille,recette,rapport}
+|-- preuves/
+|-- Dockerfile
+|-- Makefile
+`-- README.md
+\end{lstlisting}
+
+% ============================================================
+\section{Risques et parades}
+% ============================================================
+\begin{center}
+\begin{tabular}{L{4.4cm}L{2.2cm}L{7.8cm}}
+\rowcolor{bleu}\hd{Risque} & \hd{Impact} & \hd{Parade}\\
+Application cible inadaptée ou licence floue & Retard & Projet maison « EventSchedule » en secours\\
+Faux positifs (LAUNCHER, valeurs par défaut) & Mauvais constat & Règles documentées, tests de cas limites\\
+Environnement non reproductible sur un poste & Recette non validée & Docker, guide de dépannage, test à froid au sprint 5\\
+Dérive vers MobSF/APK avant le MVP & Retard & Extensions gelées jusqu'à validation du MVP\\
+Membre ne maîtrisant pas tout & Pénalité en soutenance & Revue croisée et démonstration individuelle\\
+\end{tabular}
+\end{center}
+
+% ============================================================
+\section{Critères d'acceptation globale}
+% ============================================================
+\begin{itemize}
+  \item Les 3 exigences du MVP et les 3 tests de recette sont validés avec preuves.
+  \item Un tiers reproduit \textit{setup $\rightarrow$ start $\rightarrow$ test $\rightarrow$ stop} sans aide.
+  \item Le dossier est cohérent : chaque constat est relié à une règle et à une référence.
+  \item Aucun secret, donnée personnelle ou appareil réel n'est impliqué.
+\end{itemize}
+
+% ============================================================
+\section{Planification en six sprints}
+% ============================================================
+Durée indicative : une semaine par sprint (six semaines), ajustable selon le calendrier de l'encadrant. Chaque sprint se termine par une revue et une démonstration.
+
+\subsection{Sprint 1 --- Cadrage et mise en place du laboratoire}
+\textbf{Objectif :} valider le sujet et disposer d'un environnement fonctionnel sur chaque poste.
+\begin{itemize}
+  \item Valider le sujet, le périmètre et ce cahier des charges avec l'encadrant ; répartir les rôles.
+  \item Choisir l'application cible, vérifier sa licence, rédiger la fiche de cible (source, version, SDK cible).
+  \item Créer le dépôt Git, la structure de dossiers et les conventions (branches, commits).
+  \item Écrire le Dockerfile et un premier \code{make setup}.
+  \item Récupérer ou créer le manifeste de base et le versionner.
+  \item Établir le backlog, la matrice des risques et le planning.
+\end{itemize}
+\textbf{Livrables :} fiche de cible, dépôt initialisé, conteneur opérationnel, backlog.\\
+\textbf{Critères d'acceptation :} \code{make setup} réussit sur chaque poste ; l'encadrant valide la cible.
+
+\subsection{Sprint 2 --- Référentiel et grille des 4 contrôles}
+\textbf{Objectif :} disposer d'une grille de contrôle précise, justifiée et validée.
+\begin{itemize}
+  \item Étudier la structure du manifeste et la documentation Android officielle (permissions, \code{exported}, sauvegarde, trafic en clair).
+  \item Sélectionner les 4 contrôles et formaliser pour chacun : risque, règle \PASS{}/\WARN{}/\FAIL{}, sévérité, remédiation, faux positifs.
+  \item Recenser les références (CWE, OWASP MASVS) avec sources vérifiées.
+  \item Choisir le paramètre volontairement permissif et préparer les manifestes « avant » et « après ».
+  \item Faire valider la grille par l'encadrant.
+\end{itemize}
+\textbf{Livrables :} grille v1, manifestes avant/après, tableau de références.\\
+\textbf{Critères d'acceptation :} chaque contrôle a une règle sans ambiguïté ; la différence avant/après ne porte que sur le point ciblé.
+
+\subsection{Sprint 3 --- Développement du script d'audit}
+\textbf{Objectif :} produire un script fonctionnel qui applique les 4 contrôles.
+\begin{itemize}
+  \item Implémenter le chargement sécurisé du XML et la gestion des espaces de noms.
+  \item Implémenter C1 à C4 sous forme de fonctions indépendantes avec registre.
+  \item Gérer les cas limites : valeur par défaut de \code{exported}, LAUNCHER, attributs absents.
+  \item Implémenter l'affichage console, l'export JSON et les codes de sortie.
+  \item Gérer les erreurs (fichier absent, XML invalide, manifeste vide).
+  \item Effectuer une relecture de code croisée.
+\end{itemize}
+\textbf{Livrables :} \code{audit.py} v1, exemples de rapports.\\
+\textbf{Critères d'acceptation :} le script produit 4 états avec justification sur les deux manifestes ; le contrôle ciblé est \FAIL{} avant.
+
+\subsection{Sprint 4 --- Tests automatisés et chaîne d'automatisation}
+\textbf{Objectif :} fiabiliser le script et automatiser tout le cycle.
+\begin{itemize}
+  \item Écrire les tests \code{pytest} : un cas \PASS{} et un cas \FAIL{} par contrôle, cas limites, cas d'erreur.
+  \item Écrire le test avant/après (le constat ciblé passe de \FAIL{} à \PASS{}, les autres restent identiques).
+  \item Implémenter la comparaison \code{--compare}.
+  \item Finaliser \code{make setup/start/test/stop} et leurs équivalents shell.
+  \item Rédiger la liste des actions non automatisables.
+  \item Mesurer la couverture et corriger les défauts.
+\end{itemize}
+\textbf{Livrables :} suite de tests, scripts de déploiement et de validation, guide d'exécution.\\
+\textbf{Critères d'acceptation :} \code{make test} vert ; le cycle complet s'exécute sans intervention manuelle.
+
+\subsection{Sprint 5 --- Correction, vérification et recette}
+\textbf{Objectif :} exécuter officiellement la recette et collecter les preuves.
+\begin{itemize}
+  \item Appliquer la correction du paramètre sur le projet de test (commit dédié).
+  \item Relancer l'audit et conserver les rapports avant/après et le diff Git.
+  \item Exécuter T1, T2, T3 en renseignant action, attendu, résultat et preuve.
+  \item Chaque membre redéploie et valide le MVP sur sa propre machine ; collecte de ses preuves.
+  \item Traiter les anomalies relevées et rejouer les tests concernés.
+\end{itemize}
+\textbf{Livrables :} rapport de recette signé, dossier de preuves par membre.\\
+\textbf{Critères d'acceptation :} 3 tests sur 3 validés sur chaque poste.
+
+\subsection{Sprint 6 --- Documentation, extension et soutenance}
+\textbf{Objectif :} livrer un dossier final cohérent et préparer la soutenance.
+\begin{itemize}
+  \item Rédiger le rapport final : contexte, méthode, grille, résultats, limites, leçons apprises.
+  \item Mettre à jour le README (installation, usage, dépannage) et tester à froid sur une machine propre.
+  \item Extension optionnelle, uniquement si le MVP est validé : MobSF en conteneur et comparaison avec le script.
+  \item Préparer la démonstration (scénario avant $\rightarrow$ correction $\rightarrow$ après) et le support de soutenance.
+  \item Répéter la soutenance avec questions croisées pour garantir la maîtrise individuelle.
+  \item Geler la version (tag Git) et remettre les livrables.
+\end{itemize}
+\textbf{Livrables :} rapport final, dépôt versionné, support, démonstration.\\
+\textbf{Critères d'acceptation :} reproduction par un tiers ; chaque membre explique et exécute l'ensemble du projet.
+
+% ============================================================
+\section{Synthèse du planning}
+% ============================================================
+\begin{center}
+\begin{tabular}{L{1.6cm}L{6cm}L{6.6cm}}
+\rowcolor{bleu}\hd{Sprint} & \hd{Thème} & \hd{Jalon de sortie}\\
+S1 & Cadrage et laboratoire & Cible validée, environnement prêt\\
+S2 & Référentiel et grille & Grille et manifestes validés\\
+S3 & Script d'audit & 4 contrôles fonctionnels\\
+S4 & Tests et automatisation & \code{make test} vert\\
+S5 & Correction et recette & 3/3 tests avec preuves\\
+S6 & Documentation et soutenance & Dossier final livré\\
+\end{tabular}
+\end{center}
+
+\end{document}
